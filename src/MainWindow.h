@@ -69,8 +69,5 @@ private:
     HWND hwnd;
     std::string title;
     HANDLE windowID = 0;
-    HANDLE b1ID;
-    HANDLE b2ID;
-    HANDLE e1ID;
 
 };

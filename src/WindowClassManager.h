@@ -16,11 +16,11 @@ using WindowProcSignature = LRESULT (*)(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 struct WindowClassDescriptor {
     WindowProcSignature callback;
     std::string className;
+    UINT style = 0;
 };
 
 class WindowClassBuilder {
 public:
-
     static WindowClassBuilder builder() {
         return WindowClassBuilder{};
     }
@@ -34,6 +34,17 @@ public:
         result.className = className_;
         return *this;
     }
+
+    WindowClassBuilder& addStyle(UINT style) {
+        result.style &= style;
+        return *this;
+    }
+
+    WindowClassBuilder& removeStyle(UINT style) {
+        result.style &= ~style;
+        return *this;
+    }
+
 
     WindowClassDescriptor build() {
         return result;
@@ -53,6 +64,7 @@ public:
         wc.lpfnWndProc = descriptor.callback;
         wc.hInstance = MODULE_INFO.hInstance;
         wc.lpszClassName = addName(descriptor.className);
+        wc.style = descriptor.style;
 
         classes.emplace_back(wc);
 

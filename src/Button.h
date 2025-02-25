@@ -31,6 +31,9 @@ public:
 
     HWND attach(HWND parent) override
     {
+
+        HMENU id = (HMENU) getID();
+
         HWND handle = CreateWindow(
             TEXT("BUTTON"), // Window Class
             TEXT(placeholder.c_str()),
@@ -40,7 +43,7 @@ public:
             getWidth(),
             getHeight(),
             parent,
-            (HMENU) getID(),
+            id,
             (HINSTANCE)GetWindowLongPtr(parent, GWLP_HINSTANCE),
             NULL
         );
@@ -78,7 +81,7 @@ private:
 
     std::function<void ()> handleProc;
 
-    WindowCallbackProcedure OldProc;
+    WindowCallbackProcedure OldProc = nullptr;
 
 };
 

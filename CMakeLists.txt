@@ -8,4 +8,7 @@ add_executable(main WIN32
     src/WindowClassManager.cpp
 )
 
+find_package(OpenGL REQUIRED)
+
 target_link_libraries(main User32)
+target_link_libraries(main OpenGL::GL)

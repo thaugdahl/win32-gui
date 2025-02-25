@@ -1,7 +1,5 @@
 #pragma once
 
-
-#include <minwindef.h>
 #include <windows.h>
 
 class ResizableInterface {

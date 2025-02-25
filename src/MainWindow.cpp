@@ -12,11 +12,21 @@ static HWND hButton2;
 // static HWND hEdit1;
 
 
+
+
+
+
+
+
+
+
 // Window procedure
 LRESULT CALLBACK MainWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
         case WM_CREATE:
             {
+
+
                 break;
             }
 

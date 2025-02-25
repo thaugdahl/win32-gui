@@ -8,6 +8,7 @@
 #include <atomic>
 #include <map>
 
+#include "GLViewport.h"
 #include "MainWindow.h"
 #include "TextBox.h"
 #include "Button.h"
@@ -37,10 +38,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     }
 
     TextBox box{"This is a test", 200, 30, 20, 20};
-    Button btn{"Click me!", 200, 30, 20, 200};
+    Button btn{"Click me!", 200, 30, 20, 60};
+
+    GLViewport glvp{200, 200, 100, 100};
 
     box.attach(hwnd);
     btn.attach(hwnd);
+    glvp.attach(hwnd);
 
     btn.setHandler([&box] () {
 
