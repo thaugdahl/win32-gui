@@ -46,6 +46,23 @@ public:
     }
 
 protected:
+
+    void setWidth(size_t width) {
+        this->width = width;
+    }
+
+    void setHeight(size_t height) {
+        this->height = height;
+    }
+
+    void setAnchorX(size_t anchor_x) {
+        this->anchor_x = anchor_x;
+    }
+
+    void setAnchorY(size_t anchor_x) {
+        this->anchor_x = anchor_x;
+    }
+
     size_t width;
     size_t height;
 

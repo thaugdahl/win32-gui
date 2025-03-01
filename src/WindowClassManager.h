@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "DebugHelp.h"
 
 #ifdef _WIN32
 struct MyStoredWin32Info {
@@ -36,7 +37,7 @@ public:
     }
 
     WindowClassBuilder& addStyle(UINT style) {
-        result.style &= style;
+        result.style |= style;
         return *this;
     }
 
@@ -58,7 +59,15 @@ private:
 
 class WindowClassManager {
 public:
-    static WNDCLASS* addClass(WindowClassDescriptor &descriptor) {
+    static ATOM addClass(WindowClassDescriptor &descriptor) {
+
+        // Avoid creating twice
+        if (getName(descriptor.className)) {
+            return classAtoms[descriptor.className];
+        }
+
+
+
         WNDCLASS wc = {};
 
         wc.lpfnWndProc = descriptor.callback;
@@ -68,10 +77,12 @@ public:
 
         classes.emplace_back(wc);
 
-        RegisterClass(&classes.back());
+        ATOM classAtom = RegisterClass(&wc);
 
 
-        return &classes.back();
+        classAtoms[descriptor.className] = classAtom;
+
+        return classAtom;
     }
 
     static const char* getName(const std::string& name) {
@@ -96,5 +107,6 @@ private:
 
 private:
     static std::vector<WNDCLASS> classes;
+    static std::map<std::string, ATOM> classAtoms;
     static std::map<std::string,std::string> classNames;
 };

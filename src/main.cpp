@@ -9,6 +9,7 @@
 #include <map>
 
 #include "GLViewport.h"
+#include "HorizontalElemContainer.h"
 #include "MainWindow.h"
 #include "TextBox.h"
 #include "Button.h"
@@ -39,18 +40,32 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     TextBox box{"This is a test", 200, 30, 20, 20};
     Button btn{"Click me!", 200, 30, 20, 60};
+    Button btn2{"Click me as well please!", 200, 30, 20, 90};
+
+    HorizontalElemContainer container(1000, 40);
+
+    container.add(0.5, &btn);
+    container.add(0.5, &btn2);
 
     GLViewport glvp{200, 200, 100, 100};
 
     box.attach(hwnd);
     btn.attach(hwnd);
+    btn2.attach(hwnd);
     glvp.attach(hwnd);
 
-    btn.setHandler([&box] () {
+    btn.setHandler([&box, &container] () {
 
         box.setText("Text changed");
 
+        // container.resize(500, 60);
+        // container.update();
+
     });
+
+    btn2.setHandler([&box]() {
+        box.setText("Yipee!");
+        });
 
     mainWindow.show(nCmdShow);
 

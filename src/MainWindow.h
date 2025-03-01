@@ -3,8 +3,9 @@
 #include <windows.h>
 #include <string>
 #include "WindowClassManager.h"
+#include "WindowInterface.h"
 
-class MainWindow {
+class MainWindow : public BoundingBox {
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 
@@ -23,7 +24,7 @@ public:
     }
 
     static MainWindow& getInstance() {
-        static MainWindow window{"Sample Window Class"};
+        static MainWindow window{"Sample Window Class", 1920, 1080};
 
         return window;
     }
@@ -36,10 +37,23 @@ public:
         return hwnd;
     }
 
+    void resize(size_t x, size_t y) override {
+        setWidth(x);
+        setHeight(y);
+    }
+    void position(size_t x, size_t y) override {
+        setAnchorX(x);
+        setAnchorY(y);
+    }
+
+
 private:
 
-    MainWindow(std::string className)
-        : title{"Main Window"}
+
+    MainWindow(std::string className,
+         int width, int height)
+        : title{"Main Window"},
+        BoundingBox{1920, 1080, 0,0}
     {
 
         auto classDescriptor = WindowClassBuilder::builder()

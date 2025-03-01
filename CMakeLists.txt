@@ -6,8 +6,10 @@ add_executable(main WIN32
     src/WindowIDHandler.cpp
     src/MainWindow.cpp
     src/WindowClassManager.cpp
-)
+    src/GLViewport.cpp
+ "src/GLViewport.cpp")
 
+set_property(TARGET main PROPERTY CXX_STANDARD 17)
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(main User32)

@@ -3,29 +3,12 @@
 #include "WindowIDHandler.h"
 
 
-static void* b1ID=NULL;
-static void* b2ID=NULL;
-static void* e1ID=NULL;
-
-static HWND hButton;
-static HWND hButton2;
 // static HWND hEdit1;
-
-
-
-
-
-
-
-
-
-
 // Window procedure
 LRESULT CALLBACK MainWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
         case WM_CREATE:
             {
-
 
                 break;
             }
@@ -49,8 +32,18 @@ LRESULT CALLBACK MainWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
                     SendMessage(hButton, uMsg, wParam, lParam);
                 }
 
-
                 break;
+            }
+        case WM_SIZE:
+            {
+                int newWidth = LOWORD(wParam);
+                int newHeight = HIWORD(wParam);
+
+                MainWindow &window = MainWindow::getInstance();
+                window.resize(newWidth, newHeight);
+
+                InvalidateRect(hwnd, NULL, true);
+                return DefWindowProc(hwnd, uMsg, wParam, lParam);
 
             }
         case WM_KEYDOWN:
@@ -70,6 +63,8 @@ LRESULT CALLBACK MainWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
             return 0;
 
         default:
+            // This is important! If your window class doesn't handle, e.g.,
+            // WM_NCCREATE (Non-client area create), CreateWindow will fail.
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
     return 0;
