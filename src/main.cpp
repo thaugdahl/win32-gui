@@ -42,34 +42,51 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     Button btn{"Click me!", 200, 30, 20, 60};
     Button btn2{"Click me as well please!", 200, 30, 20, 90};
 
-    HorizontalElemContainer container(1000, 40);
+    HorizontalElemContainer container(1000, 40, 400, 40);
 
-    container.add(0.5, &btn);
-    container.add(0.5, &btn2);
+    container.position(400, 40);
 
-    GLViewport glvp{200, 200, 100, 100};
+
+    auto windowWidth = mainWindow.getWidth();
+    auto windowHeight = mainWindow.getHeight();
+
+    GLViewport glvp{windowWidth - 300, windowHeight - 80, 250, 20};
+    GLViewport glvp2{windowWidth / 2 - 150, windowHeight - 80, 250, 20};
+
+    container.add(0.5, &glvp);
+    container.add(0.5, &glvp2);
+
+    mainWindow.show(nCmdShow);
 
     box.attach(hwnd);
     btn.attach(hwnd);
     btn2.attach(hwnd);
     glvp.attach(hwnd);
+    glvp2.attach(hwnd);
 
-    btn.setHandler([&box, &container] () {
-
+    btn.setHandler([&] () {
         box.setText("Text changed");
 
-        // container.resize(500, 60);
-        // container.update();
-
+        container.resize(windowWidth - 300, windowHeight - 80);
+        container.position(300, 20);
+        container.update();
+        mainWindow.redraw();
     });
 
-    btn2.setHandler([&box]() {
+    btn2.setHandler([&]() {
         box.setText("Yipee!");
-        });
 
-    mainWindow.show(nCmdShow);
+        std::unique_ptr<GLRenderer> renderer = std::make_unique<DefaultGLRenderer>(0,0,255);
+        std::unique_ptr<GLRenderer> renderer2 = std::make_unique<DefaultGLRenderer>(0,255,0);
+        glvp.setRenderer(std::move(renderer));
+        glvp2.setRenderer(std::move(renderer2));
+	});
+
 
     while (mainWindow.listen()) { };
+
+
+    WindowIDHandler::teardown();
 
     return 0;
 }

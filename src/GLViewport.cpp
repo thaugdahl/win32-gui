@@ -1,4 +1,9 @@
 #include "GLViewport.h"
+#include "DebugHelp.h"
+#include "WindowClassManager.h"
+#include "WindowIDHandler.h"
+#include "MainWindow.h"
+
 
 wglCreateContextAttribsARB_type* wglCreateContextAttribsARB;
 wglChoosePixelFormatARB_type *wglChoosePixelFormatARB;
@@ -28,15 +33,13 @@ HWND GLViewport::attach(HWND parent) {
       (HINSTANCE)GetWindowLongPtr(parent, GWLP_HINSTANCE);
 
   HWND handle = CreateWindow(
-      // className.c_str(),
       reinterpret_cast<LPCSTR>(classAtom),
       NULL,
-      // TEXT("GLViewport"),
       WS_CHILD | WS_VISIBLE, getPosX(),
       getPosY(), getWidth(), getHeight(), parent, NULL, parentHinstance, NULL);
 
   if (handle == nullptr) {
-    fatal_error("Failed to create window?");
+    fatal_error("Failed to create window!");
     return nullptr;
   }
 
@@ -45,11 +48,6 @@ HWND GLViewport::attach(HWND parent) {
   setHandle(handle);
 
   setup_glcontext(handle, this);
-  ShowWindow(handle, 1);
-  UpdateWindow(handle);
-
-  ShowWindow(handle, 1);
-  UpdateWindow(handle);
 
   return handle;
 }
@@ -66,39 +64,7 @@ LRESULT CALLBACK GLViewport::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
   return 0;
 }
-static void init_opengl_extensions(void) {
-  // Before we can load extensions, we need a dummy OpenGL context, created
-  // using a dummy window. We use a dummy window because you can only set the
-  // pixel format for a window once. For the real window, we want to use
-  // wglChoosePixelFormatARB (so we can potentially specify options that aren't
-  // available in PIXELFORMATDESCRIPTOR), but we can't load and use that before
-  // we have a context. WNDCLASSA window_class = { 0 };
-  //     window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-  //     window_class.lpfnWndProc = DefWindowProcA;
-  //     window_class.hInstance = GetModuleHandle(0);
-  //     window_class.lpszClassName = "Dummy_WGL_djuasiodwa";
-
-  // if (!RegisterClassA(&window_class)) {
-  //     fatal_error("Failed to register dummy OpenGL window.");
-  // }
-
-  // HWND dummy_window = CreateWindowExA(
-  //     0,
-  //     window_class.lpszClassName,
-  //     "Dummy OpenGL Window",
-  //     0,
-  //     CW_USEDEFAULT,
-  //     CW_USEDEFAULT,
-  //     CW_USEDEFAULT,
-  //     CW_USEDEFAULT,
-  //     0,
-  //     0,
-  //     window_class.hInstance,
-  //     0);
-
-  // if (!dummy_window) {
-  //     fatal_error("Failed to create dummy OpenGL window.");
-  // }
+void GLViewport::init_opengl_extensions(void) {
 
   HDC dummy_dc = GetDC(MainWindow::getInstance().getHandle());
 
@@ -147,8 +113,8 @@ static void init_opengl_extensions(void) {
   // DestroyWindow(dummy_window);
 }
 
-static HGLRC init_opengl(HDC real_dc) {
-  init_opengl_extensions();
+HGLRC GLViewport::init_opengl(HDC real_dc) {
+    GLViewport::init_opengl_extensions();
 
   // Now we can choose a pixel format the modern way, using
   // wglChoosePixelFormatARB.
@@ -207,53 +173,46 @@ static HGLRC init_opengl(HDC real_dc) {
   return gl33_context;
 }
 
-DWORD WINAPI RenderThreadProc(LPVOID param) {
-  HDC dc = hDevContext;
+void GLViewport::setupRenderContext() {
+    HGLRC glcr = init_opengl(hDeviceContext);
 
-  HGLRC glrc = init_opengl(dc);
-
-  GLViewport &viewport = *((GLViewport *)param);
-
-  MessageBox(NULL, "Hello from render thread", "ERROR", MB_OK | MB_ICONERROR);
-  SIZE canvas_size;
-  scoped_hglrc simpleRenderContext{wglCreateContext(dc)};
-
-  if (!wglMakeCurrent(hDevContext, simpleRenderContext.get())) {
-    return false;
-  };
-
-  wglCreateContextAttribsARB =
-      (wglCreateContextAttribsARB_type *)wglGetProcAddress(
-          "wglCreateContextAttribsARB");
 
   int const create_attribs[] = {WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
                                 WGL_CONTEXT_MINOR_VERSION_ARB, 1, 0};
 
-  scoped_hglrc renderContext{
-      wglCreateContextAttribsARB(hDevContext, NULL, create_attribs)};
+  renderContext.set(wglCreateContextAttribsARB(hDeviceContext, NULL, create_attribs));
 
   if (!renderContext) {
-    return EXIT_FAILURE;
+        fatal_error("Failed to make render context");
+    return;
   }
 
-  wglMakeCurrent(hDevContext, renderContext.get());
+  if ( ! wglMakeCurrent(hDeviceContext, NULL) ) {
+        fatal_error("Failed to release device context");
+    };
 
-  size_t width = viewport.getWidth();
-  size_t height = viewport.getHeight();
-  size_t vx = viewport.getPosX();
-  size_t vy = viewport.getPosY();
+  wglMakeCurrent(hDeviceContext, renderContext.get());
 
-  glDisable(GL_DITHER);
+}
 
-  glClearColor(1.f, 0.f, 0.f, 1.0f);
+DWORD WINAPI GLViewport::RenderThreadProc(LPVOID param) {
 
-  while (true) {
-    glViewport(vx, vy, width, height);
-    glClear(GL_COLOR_BUFFER_BIT);
+    GLViewport *viewport = reinterpret_cast<GLViewport *>(param);
 
-    SwapBuffers(hDevContext);
-  }
+    GLRenderer *renderer = viewport->getRenderer();
 
-  return EXIT_SUCCESS;
+    if ( ! renderer ) {
+      return EXIT_FAILURE;
+    }
+
+    auto *renderProc = renderer->getRenderProc();
+
+
+    renderProc(viewport);
+
+    // Release the device context.
+    wglMakeCurrent(NULL, NULL);
+
+    return EXIT_SUCCESS;
 }
 

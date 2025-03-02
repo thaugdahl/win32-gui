@@ -75,6 +75,8 @@ public:
         wc.lpszClassName = addName(descriptor.className);
         wc.style = descriptor.style;
 
+        // This is needed to color the background on erasure.
+        wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
         classes.emplace_back(wc);
 
         ATOM classAtom = RegisterClass(&wc);

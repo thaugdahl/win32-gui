@@ -10,7 +10,5 @@ struct WindowIDHandler {
     static size_t getNew();
 
     static bool setup();
-
-  private:
     static bool teardown();
 };

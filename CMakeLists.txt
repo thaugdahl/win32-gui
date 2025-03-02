@@ -7,6 +7,7 @@ add_executable(main WIN32
     src/MainWindow.cpp
     src/WindowClassManager.cpp
     src/GLViewport.cpp
+    src/GLRenderer.cpp
  "src/GLViewport.cpp")
 
 set_property(TARGET main PROPERTY CXX_STANDARD 17)

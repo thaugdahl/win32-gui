@@ -11,6 +11,11 @@ public:
 
     }
 
+    HorizontalElemContainer(int width, int height, int posx, int posy)
+    : BoundingBox(width, height, posx, posy) {
+
+    }
+
     void add(double percentage, ResizableInterface *window) {
         subWindows.emplace_back(std::make_pair(percentage, window));
     }
@@ -43,7 +48,7 @@ private:
         //  |   | |    | |       |
         //  |---| |----| |-------|
         //
-        width -= padding * (subWindows.size() + 1);
+        width -= padding * (subWindows.size() + 2);
 
         size_t xPos = padding;
         for ( std::size_t idx = 0; idx < subWindows.size(); idx++ ) {
@@ -52,7 +57,11 @@ private:
             auto windowHeight = window->getHeight();
 
             size_t newWidth = static_cast<size_t>(double(width) * percentage);
+
+            const auto containerPosX = getPosX();
             window->resize(newWidth, windowHeight);
+            window->position(
+                containerPosX + xPos, getPosY());
 
             xPos += newWidth + padding;
         }

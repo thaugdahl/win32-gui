@@ -46,6 +46,14 @@ public:
         setAnchorY(y);
     }
 
+    void redraw() {
+        HWND handle = getHandle();
+        // InvalidateRect(handle, NULL, true);
+        RedrawWindow(handle, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_UPDATENOW);
+        // RedrawWindow(handle, NULL, NULL, RDW_ERASE);
+        // UpdateWindow(handle);
+    }
+
 
 private:
 
@@ -66,13 +74,12 @@ private:
         const char* cpClassName = WindowClassManager::getName(className);
 
         // Create the main window
-
         hwnd = CreateWindowEx(
             0,
             cpClassName,
             title.c_str(),
             WS_OVERLAPPEDWINDOW,
-            CW_USEDEFAULT, CW_USEDEFAULT, 1000, 600,
+            CW_USEDEFAULT, CW_USEDEFAULT, getWidth(), getHeight(),
             NULL,
             NULL,
             MODULE_INFO.hInstance,

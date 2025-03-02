@@ -1,6 +1,8 @@
 #pragma once
 
 #include <windows.h>
+#include <sstream>
+#include <iostream>
 
 class ResizableInterface {
 public:
@@ -59,8 +61,8 @@ protected:
         this->anchor_x = anchor_x;
     }
 
-    void setAnchorY(size_t anchor_x) {
-        this->anchor_x = anchor_x;
+    void setAnchorY(size_t anchor_y) {
+        this->anchor_y = anchor_y;
     }
 
     size_t width;
@@ -82,40 +84,40 @@ public:
         size_t anchor_x, size_t anchor_y)
     : BoundingBox{width, height, anchor_x, anchor_y} {}
 
-    void resize(size_t x, size_t y) override {
+    void resize(size_t width, size_t height) override {
 
-        RECT resizerRect;
 
-        WindowType *instance = reinterpret_cast<WindowType *>(this);
+        WindowType *instance = static_cast<WindowType *>(this);
 
         HWND handle = instance->getHandle();
 
-        if ( GetWindowRect(instance->getHandle(), &resizerRect ) ) {
-            int px = resizerRect.left;
-            int py = resizerRect.top;
+        RECT resizerRect;
+        if ( GetWindowRect(handle, &resizerRect ) ) {
 
-            int width = x;
-            int height = y;
+            // Map points to client space instead of desktop space
+            HWND parentHandle = GetParent(handle);
+            POINT mapPoint = { resizerRect.left, resizerRect.top };
+            MapWindowPoints(HWND_DESKTOP, parentHandle, &mapPoint, 1);
 
-            MoveWindow(handle, px, py, width * 2, height, true);
+            int px = mapPoint.x;
+            int py = mapPoint.y;
+
+
+            MoveWindow(handle, px, py, int(width), int(height), true);
             ShowWindow(handle, 1);
-
         }
     }
 
     void position(size_t x, size_t y) override {
-
-        RECT resizerRect;
-
-        WindowType *instance = reinterpret_cast<WindowType *>(this);
-
+        WindowType *instance = static_cast<WindowType *>(this);
         HWND handle = instance->getHandle();
 
+        RECT resizerRect;
         if ( GetWindowRect(instance->getHandle(), &resizerRect ) ) {
             int width = resizerRect.right - resizerRect.left;
             int height = resizerRect.bottom- resizerRect.top;
 
-            MoveWindow(handle, x, y, width * 2, height, true);
+            MoveWindow(handle, int(x), int(y), width, height, true);
             ShowWindow(handle, 1);
 
         }
@@ -132,6 +134,7 @@ public:
     virtual size_t getID() const {
         return ID;
     }
+
 
 protected:
     virtual void setHandle(HWND handle) {
