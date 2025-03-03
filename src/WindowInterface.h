@@ -127,7 +127,7 @@ public:
 
 class WindowInterface {
 public:
-    virtual HWND getHandle() {
+    virtual HWND getHandle() const {
         return handle;
     }
 

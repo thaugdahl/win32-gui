@@ -22,6 +22,13 @@ public:
         setID(static_cast<size_t>(ID));
     }
 
+    std::string getText() const {
+
+        char buff[1024];
+        GetWindowText(getHandle(), buff, 1024);
+
+        return std::string{buff};
+    }
 
     void setText(const std::string &text) {
         SendMessage(handle, WM_SETTEXT, 0, (LPARAM)text.c_str());

@@ -208,6 +208,9 @@ private:
 
     scoped_hglrc renderContext{nullptr};
 
+    int cursorX = 0;
+    int cursorY = 0;
+
     bool exitFlag = false;
 
     static DWORD WINAPI RenderThreadProc(LPVOID param);

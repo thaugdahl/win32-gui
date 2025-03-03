@@ -58,6 +58,32 @@ LRESULT CALLBACK GLViewport::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   case WM_CREATE: {
     break;
   }
+    case WM_MOUSEMOVE: {
+            // Set cursor positions
+            POINTS pt;
+            pt = MAKEPOINTS(lParam);
+
+            bool isControlHeld = wParam &= MK_CONTROL;
+
+            void *viewportVoidPtr = (void *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
+
+            GLViewport *viewport = static_cast<GLViewport *>(viewportVoidPtr);
+
+            viewport->cursorX = pt.x;
+            viewport->cursorY = pt.y;
+
+            DefaultGLRenderer *glRenderer = dynamic_cast<DefaultGLRenderer*>(viewport->getRenderer());
+
+            if ( glRenderer ) {
+                glRenderer->setColor(
+                    isControlHeld ? 255 : 0,
+                    255 * ((float)pt.x / (float)viewport->getWidth()),
+                    255 * ((float)pt.y / (float)viewport->getHeight())
+                );
+            }
+
+
+    }
   default:
       return DefWindowProc(hwnd, uMsg, wParam, lParam);
   }

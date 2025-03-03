@@ -41,6 +41,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     TextBox box{"This is a test", 200, 30, 20, 20};
     Button btn{"Click me!", 200, 30, 20, 60};
     Button btn2{"Click me as well please!", 200, 30, 20, 90};
+    Button btn3{"Change color on left", 200, 30, 20, 120};
+    Button btn4{"Change color on right", 200, 30, 20, 150};
 
     HorizontalElemContainer container(1000, 40, 400, 40);
 
@@ -61,6 +63,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     box.attach(hwnd);
     btn.attach(hwnd);
     btn2.attach(hwnd);
+    btn3.attach(hwnd);
+    btn4.attach(hwnd);
     glvp.attach(hwnd);
     glvp2.attach(hwnd);
 
@@ -81,6 +85,64 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         glvp.setRenderer(std::move(renderer));
         glvp2.setRenderer(std::move(renderer2));
 	});
+
+    btn3.setHandler([&]() {
+        GLRenderer *renderer = glvp.getRenderer();
+        DefaultGLRenderer *adjRenderer = dynamic_cast<DefaultGLRenderer *>(renderer);
+
+        if ( adjRenderer ) {
+            std::string text = box.getText();
+
+            // Parse color
+            DefaultGLRenderer::Color color{0,0,0};
+
+
+            std::stringstream ss{text};
+            std::string token;
+
+            auto isDigit = [](char c) {
+                return c >= '0' && c <= '9';
+            };
+
+            auto res = !!std::getline(ss, token, ',');
+            if ( res && isDigit(token.front()) ) { color.r = std::stoi(token); }
+            res = !!std::getline(ss, token, ',');
+            if ( res && isDigit(token.front()) ) { color.g = std::stoi(token); }
+            res = !!std::getline(ss, token, ',');
+            if ( res && isDigit(token.front()) ) { color.b = std::stoi(token); }
+
+            adjRenderer->setColor(color.r, color.g, color.b);
+        }
+    });
+btn4.setHandler([&]() {
+        GLRenderer *renderer = glvp2.getRenderer();
+        DefaultGLRenderer *adjRenderer = dynamic_cast<DefaultGLRenderer *>(renderer);
+
+        if ( adjRenderer ) {
+            std::string text = box.getText();
+
+            // Parse color
+            DefaultGLRenderer::Color color{0,0,0};
+
+
+            std::stringstream ss{text};
+            std::string token;
+
+            auto isDigit = [](char c) {
+                return c >= '0' && c <= '9';
+            };
+
+            auto res = !!std::getline(ss, token, ',');
+            if ( res && isDigit(token.front()) ) { color.r = std::stoi(token); }
+            res = !!std::getline(ss, token, ',');
+            if ( res && isDigit(token.front()) ) { color.g = std::stoi(token); }
+            res = !!std::getline(ss, token, ',');
+            if ( res && isDigit(token.front()) ) { color.b = std::stoi(token); }
+
+            adjRenderer->setColor(color.r, color.g, color.b);
+        }
+    });
+
 
 
     while (mainWindow.listen()) { };
